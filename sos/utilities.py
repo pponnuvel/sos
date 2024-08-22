@@ -228,9 +228,6 @@ def sos_get_command_output(command, timeout=TIMEOUT_DEFAULT, stderr=False,
         if runas:
             os.setgid(pwd.getpwnam(runas).pw_gid)
             os.setuid(pwd.getpwnam(runas).pw_uid)
-            os.chdir(pwd.getpwnam(runas).pw_dir)
-        if chdir:
-            os.chdir(chdir)
 
     def _check_poller(proc):
         if poller() or proc.poll() == 124:
@@ -280,8 +277,16 @@ def sos_get_command_output(command, timeout=TIMEOUT_DEFAULT, stderr=False,
     else:
         _output = PIPE
     try:
+        _child_cwd=None
+        if chdir:
+            _child_cwd=chdir
+        elif runas:
+            _child_cwd=pwd.getpwnam(runas).pw_dir
+
+        # pylint: disable=subprocess-popen-preexec-fn
         with Popen(expanded_args, shell=False, stdout=_output,
                    stderr=STDOUT if stderr else PIPE,
+                   cwd=_child_cwd,
                    bufsize=-1, env=cmd_env, close_fds=True,
                    preexec_fn=_child_prep_fn) as p:
 

@@ -43,4 +43,3 @@ disable=
     W0102, # dangerous-default-value
     W0707, # raise-missing-from
     W0212, # protected-access
-    W1509, # subprocess-popen-preexec-fn
